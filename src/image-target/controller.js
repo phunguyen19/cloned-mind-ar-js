@@ -91,10 +91,14 @@ class Controller {
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch(t, { cache: 'force-cache' });
-        const buffer = await response.arrayBuffer(); // Get the response as a buffer
-        const gzData = new Uint8Array(buffer);
-        const unzippedData = pako.inflate(gzData);
-        const targets = this.addImageTargetsFromBuffer(unzippedData);
+        let buffer = await response.arrayBuffer(); // Get the response as a buffer
+
+        if (t.endsWith('.gz')) {
+          const gzData = new Uint8Array(buffer);
+          buffer = pako.inflate(gzData);
+        }
+
+        const targets = this.addImageTargetsFromBuffer(buffer);
         resolve(targets);
       } catch (error) {
         reject(error);
